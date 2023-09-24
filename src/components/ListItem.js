@@ -1,17 +1,24 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import { weatherType } from "../utilities/weatherType";
+import moment from "moment";
 
 const ListItem = (props) => {
   const { dt_txt, min, max, condition } = props;
-  const { item, temp } = styles;
+  const { item, temp, itemShadow, date, dateTextWrapper, highLowWrapper } =
+    styles;
+
   return (
-    <View style={item}>
-      <Feather name="sun" size={40} color="black" />
-      <Text>{dt_txt}</Text>
-      <View>
-        <Text style={temp}>{min}</Text>
-        <Text style={temp}>{max}</Text>
+    <View style={[item, itemShadow]}>
+      <Feather name={weatherType[condition].icon} size={40} color="white" />
+      <View style={dateTextWrapper}>
+        <Text style={date}>{moment(dt_txt).format("dddd")}</Text>
+        <Text style={date}>{moment(dt_txt).format("LT")}</Text>
+      </View>
+      <View style={highLowWrapper}>
+        <Text style={temp}>{`${Math.round(min)}°`}/</Text>
+        <Text style={temp}>{`${Math.round(max)}°`}</Text>
       </View>
     </View>
   );
@@ -26,13 +33,28 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
     marginHorizontal: 16,
     marginVertical: 8,
-    backgroundColor: "pink",
+    backgroundColor: "darkgrey",
     borderRadius: 10,
-    boxShadow:
-      "0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)",
+  },
+
+  itemShadow: {
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 7,
   },
   temp: {
     fontSize: 20,
+    color: "white",
+  },
+  date: {
+    color: "white",
+  },
+  highLowWrapper: {
+    flexDirection: "row",
+  },
+  dateTextWrapper: {
+    flexDirection: "column",
   },
 });
 

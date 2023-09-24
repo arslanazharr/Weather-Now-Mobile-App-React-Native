@@ -1,24 +1,94 @@
-import { StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-web";
+import {
+  StyleSheet,
+  View,
+  SafeAreaView,
+  ImageBackground,
+  RefreshControl,
+  ScrollView,
+} from "react-native";
 import { Feather } from "@expo/vector-icons";
+import RowText from "../components/RowText";
+import { weatherType } from "../utilities/weatherType";
+import { useState } from "react";
+import { useGetWeather } from "../../hooks/useGetWeather";
 
-export default function CurrentWeather() {
+export default function CurrentWeather({ weatherData }) {
+  const [refresh, setRefresh] = useState(false);
+  const [l, e, w, refreshData] = useGetWeather();
+
+  const refreshApp = () => {
+    setRefresh(true);
+    setTimeout(async () => {
+      await refreshData();
+      setRefresh(false);
+    }, 4000);
+  };
+
+  const {
+    message,
+    description,
+    bodyWrapper,
+    highLow,
+    highLowWrapper,
+    feels,
+    tempStyle,
+    container,
+    wrapper,
+    textShadow,
+  } = styles;
+
+  const {
+    main: { feels_like, temp, temp_max, temp_min },
+    weather,
+  } = weatherData;
+
+  const weatherCondition = weather[0]?.main;
+
   return (
-    <SafeAreaView style={styles.wrapper}>
-      <View style={styles.container}>
-        <Feather name="sun" size={100} color="black" />
-        <Text>Current Weather</Text>
-        <Text style={styles.temp}>6</Text>
-        <Text style={styles.feels}>Feels like 5</Text>
-        <View style={styles.highLowWrapper}>
-          <Text style={styles.highLow}>High: 8</Text>
-          <Text style={styles.highLow}>Low: 3</Text>
-        </View>
-      </View>
-      <View style={styles.bodyWrapper}>
-        <Text style={styles.description}>Its Sunny</Text>
-        <Text style={styles.message}>Its perfect t-shirt weather</Text>
-      </View>
+    <SafeAreaView style={wrapper}>
+      <ImageBackground
+        source={weatherType[weatherCondition]?.img}
+        style={{ flex: 1 }}
+      >
+        <ScrollView
+          refreshControl={
+            <RefreshControl
+              refreshing={refresh}
+              onRefresh={() => refreshApp()}
+            />
+          }
+        >
+          <View style={container}>
+            <Feather
+              name={weatherType[weatherCondition]?.icon}
+              size={100}
+              color="white"
+              style={styles.icon}
+            />
+
+            <RowText
+              messageOne={`${Math.round(temp)}°`}
+              messageTwo={`Feels like ${Math.round(feels_like)}°`}
+              messageOneStyles={[tempStyle, textShadow]}
+              messageTwoStyles={[feels, textShadow]}
+            />
+            <RowText
+              messageOne={`H: ${Math.round(temp_max)}°`}
+              messageTwo={`L: ${Math.round(temp_min)}°`}
+              messageOneStyles={[highLow, textShadow]}
+              messageTwoStyles={[highLow, textShadow]}
+              containerStyles={highLowWrapper}
+            />
+          </View>
+        </ScrollView>
+        <RowText
+          messageOne={weather[0]?.description}
+          messageTwo={weatherType[weatherCondition]?.message}
+          messageOneStyles={[description, textShadow]}
+          messageTwoStyles={[message, textShadow]}
+          containerStyles={bodyWrapper}
+        />
+      </ImageBackground>
     </SafeAreaView>
   );
 }
@@ -26,23 +96,26 @@ export default function CurrentWeather() {
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
-    backgroundColor: "pink",
+    backgroundColor: "lightgrey",
   },
   container: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    marginTop: 40,
   },
-  temp: {
-    color: "black",
+  tempStyle: {
+    color: "white",
     fontSize: 48,
+    textAlign: "center",
+    marginTop: 10,
   },
   feels: {
     fontSize: 30,
-    color: "black",
+    color: "white",
   },
-  hightLow: {
-    color: "black",
+  highLow: {
+    color: "white",
     fontSize: 20,
   },
   highLowWrapper: {
@@ -50,15 +123,27 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   bodyWrapper: {
-    // justifyContent: "flex-end",
-    // alignItems: "start",
-    paddingLeft: 25,
     marginBottom: 40,
   },
   description: {
     fontSize: 48,
+    color: "white",
+    textTransform: "capitalize",
+    marginHorizontal: 20,
   },
   message: {
     fontSize: 30,
+    color: "white",
+    marginHorizontal: 20,
+  },
+  textShadow: {
+    textShadowColor: "black",
+    textShadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+  },
+  icon: {
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
   },
 });

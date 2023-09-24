@@ -1,20 +1,34 @@
-import { View, StyleSheet } from "react-native";
-import CurrentWeather from "./src/screens/CurrentWeather";
-import UpcomingWeather from "./src/screens/UpcomingWeather";
-import City from "./src/screens/City";
+import React from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import Tabs from "./src/components/Tabs";
+import { useGetWeather } from "./hooks/useGetWeather";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
+import ErrorPage from "./src/components/ErrorPage";
 
 const App = () => {
+  const [loading, error, weather] = useGetWeather();
+
+  if (weather && weather.list && !loading) {
+    return (
+      <NavigationContainer>
+        <Tabs weather={weather} />
+      </NavigationContainer>
+    );
+  }
   return (
     <View style={styles.container}>
-      <City />
-      {/* <CurrentWeather /> */}
-      {/* <UpcomingWeather /> */}
+      {error ? (
+        <ErrorPage />
+      ) : (
+        <ActivityIndicator size={"large"} color="darkgrey" />
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    justifyContent: "center",
     flex: 1,
   },
 });
